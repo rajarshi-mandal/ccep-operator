@@ -1,0 +1,2 @@
+# Normalize line endings: keep LF in the repo (shell scripts must stay LF).
+* text=auto eol=lf

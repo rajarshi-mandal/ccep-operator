@@ -1,0 +1,35 @@
+# Environments
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# Datasets (large; live outside the repo, never committed)
+HCP PTN/
+HCP Structural Connectivity/
+Open Neuro ds004024/
+Open Neuro ds004917/
+Open Neuro ds005498/
+Mendeley hzjrks365b/
+Zenodo/
+TESA/
+Open Neuro */
+
+# Processed/cached pipeline outputs and raw downloads
+data/raw/
+data/processed/
+data/traces/
+data/external/
+
+# Transient experiment run logs (regenerate via scripts/reproduce.sh)
+reports/_*
+
+# Training artifacts
+*.pt
+*.ckpt
+wandb/
+runs/

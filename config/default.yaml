@@ -1,0 +1,109 @@
+# Causal DAG-SSM — default configuration
+# Every human-decision point from the spec is exposed here.
+
+seed: 0
+
+# ----------------------------------------------------------------------------
+# Data paths (absolute; datasets live in the project root, alongside this repo)
+# ----------------------------------------------------------------------------
+paths:
+  project_root: "REDACTED"
+  hcp_ptn_dir: "REDACTED/HCP PTN"
+  hcp_struct_dir: "REDACTED/HCP Structural Connectivity"
+  ds004024_dir: "REDACTED/Open Neuro ds004024"
+  zenodo_dir: "REDACTED/Zenodo"
+  tesa_dir: "REDACTED/TESA"
+  processed_dir: "REDACTED/causal-dag-ssm/data/processed"
+
+# ----------------------------------------------------------------------------
+# Parcellation (DECISION): HCP native group-ICA d100 — already on disk.
+#   d = number of brain regions = latent state dimension of the SSM.
+# ----------------------------------------------------------------------------
+parcellation:
+  scheme: "hcp_ica_100"          # one of: hcp_ica_100, hcp_ica_50, schaefer_100
+  d: 100
+
+# ----------------------------------------------------------------------------
+# fMRI (observational) preprocessing
+# ----------------------------------------------------------------------------
+fmri:
+  ica_dim: 100                   # which NodeTimeseries ICAd{N} package to use
+  zscore: true
+  # HCP PTN timeseries: TR = 0.72s, 4 runs x 1200 frames per subject (recon2)
+  tr: 0.72
+  max_subjects: null             # null = all; set an int for quick dev runs
+
+# ----------------------------------------------------------------------------
+# TMS-EEG (interventional) preprocessing
+# ----------------------------------------------------------------------------
+tms_eeg:
+  epoch_tmin: -0.100             # s, relative to TMS pulse
+  epoch_tmax: 0.500              # s
+  blank_tmin: -0.002             # s, TMS artifact blanking window start
+  blank_tmax: 0.010              # s, blanking window end
+  interp: "cubic"                # spline interpolation across the blanked gap
+  bandpass: [1.0, 80.0]          # Hz
+  notch_ds004024: 60.0           # Hz — US origin (Shirley Ryan AbilityLab)
+  notch_zenodo: 50.0             # Hz — EU origin (parietal dataset)
+  reref: "average"
+  run_ica: false                 # residual muscle/ocular ICA (slow; off for dev)
+  baseline: [-0.100, -0.005]     # s, baseline correction window
+  resample: 1000.0               # Hz, downsample after artifact removal (from 20 kHz)
+  ds004024_pulse_label: "Stimulus/A"   # BIDS events.tsv trial_type for the TMS pulse
+  montage: "standard_1005"       # MNE montage for electrode MNI positions
+  zenodo_pulse_idx: 1045         # sample index of TMS pulse in Zenodo epochs
+  zenodo_sfreq: 2048.0           # Hz
+
+# ----------------------------------------------------------------------------
+# EEG <-> atlas spatial bridge (the likely failure point — see spec 3.5)
+# ----------------------------------------------------------------------------
+bridge:
+  method: "nearest_centroid"     # nearest-neighbor electrode-MNI -> parcel centroid
+  k: 1
+
+# ----------------------------------------------------------------------------
+# Model (DECISIONS): linear Gaussian SSM; edge convention A[i,j] = "j influences i"
+# ----------------------------------------------------------------------------
+model:
+  nonlinear: false               # linear Gaussian SSM (default, Kalman-exact)
+  edge_convention: "j_influences_i"   # A[i,j] != 0  =>  region j drives region i
+                                      # => incoming edges to i are ROW i of A
+  inference: "kalman"            # one of: kalman, variational
+  obs_dim_fmri: 100              # C maps latent -> observed; fMRI obs = d regions
+  input_dim: 1                   # TMS stimulus channel(s)
+  init_state_scale: 0.1
+
+# ----------------------------------------------------------------------------
+# DAG constraint (NOTEARS augmented Lagrangian)
+# ----------------------------------------------------------------------------
+dag:
+  variant: "notears"            # notears (tr(exp(W*W))-d) or dagma (logdet) fallback
+  threshold: 0.3                # post-training |w| below this -> 0
+  rho_init: 1.0
+  rho_max: 1.0e+10
+  rho_mult: 10.0                # ramp factor per outer iteration
+  alpha_init: 0.0
+  h_tol: 1.0e-8                 # target h(W) ~ 0
+  progress_rate: 0.25           # require h to shrink by this factor; else bump rho
+
+# ----------------------------------------------------------------------------
+# Training
+# ----------------------------------------------------------------------------
+train:
+  lr: 1.0e-3
+  weight_decay: 0.0
+  batch_size: 16
+  lambda_int: 1.0               # weight on interventional loss term
+  inner_steps: 1000             # optimizer steps per outer (Lagrangian) iteration
+  outer_steps: 20               # number of augmented-Lagrangian outer iterations
+  device: "cpu"                 # mps/cuda if available
+  log_every: 50
+
+# ----------------------------------------------------------------------------
+# Experiment 1 — held-out TMS prediction (the go/no-go gate)
+# ----------------------------------------------------------------------------
+exp1:
+  train_sites: ["M1", "DLPFC"]
+  heldout_site: "parietal"
+  cv: "leave_one_site_out"
+  success_r: 0.55

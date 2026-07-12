@@ -1,0 +1,31 @@
+# CCEP propagation-operator pipeline pinned for reproducibility (Python 3.9.6)
+# Install:  python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+# Exact versions used to produce every number reported in the manuscript.
+
+# --- core numerics (required for the CCEP headline pipeline) ---
+numpy==2.0.2
+scipy==1.13.1
+scikit-learn==1.6.1   # gradient-boosted ensemble + responder/SOZ AUCs
+pandas==2.3.3
+
+# --- CCEP / iEEG signal IO ---
+pymef==1.4.6          # MEF3 readers (MAYO/ds004774, ds004696, ds004457, ds003708)
+mne==1.8.0            # BrainVision reader (ds004080 ccepAge)
+
+# --- figures ---
+matplotlib==3.9.4
+
+# --- model + graph utilities ---
+torch==2.8.0          # trained-operator variants (es_readout.ESReadout/ESReadout2)
+networkx==3.2.1       # network controllability (Gu formulation)
+
+# --- external validation + abandoned probes (Glasser parcels, DWI, animal, fMRI) ---
+nibabel==5.3.3        # fsaverage/Glasser-360 parcel mapping (F-TRACT cross-map, DWI)
+nilearn==0.12.1
+dipy==1.10.0
+pynwb==3.1.3          # DANDI:000774 animal microstimulation cross-check
+h5py==3.12.1          # animal .mat (v7.3) reader (experiments/daie_quicktest.py)
+
+# --- config + tests ---
+PyYAML==6.0.3
+pytest==8.3.4
