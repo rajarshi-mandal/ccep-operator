@@ -82,12 +82,13 @@ axDs.set_xticks([]); axDs.set_yticks([])
 # ---------- E: model comparison ----------
 axE = fig.add_subplot(gs[1, 0:5]); panel(axE, "E")
 labels=["within-\nmean","operator\nv1","distance","stim-\nkNN","operator","combo","ensemble"]
-vals=[0.235,0.622,0.641,0.688,0.710,0.730,0.743]
-err=[0.02]*7
+vals=[0.235,0.622,0.641,0.688,0.710,0.730,0.743]   # subject-mean held-out r (n=93); each bar labels its value below
 cols=[GREY,LGREY,NAVY,"#5B7FA6",TEAL,AMBER,GREEN]
+# No error bars: only 4 of these 7 models have a per-subject n=93 log, so honest
+# whiskers (SEM or bootstrap CI) would need per-subject scores for stim-kNN/combo/ensemble.
 axE.axhspan(0.78,0.85,color=LGREY,alpha=0.5,zorder=0)
 axE.text(6.4,0.815,"recoverable\nceiling",fontsize=6,color=INK,va="center")
-axE.bar(range(7),vals,yerr=err,color=cols,width=0.7,zorder=3,error_kw=dict(lw=0.8,capsize=2))
+axE.bar(range(7),vals,color=cols,width=0.7,zorder=3)
 for i,v in enumerate(vals): axE.text(i,v+0.03,f"{v:.3f}",ha="center",fontsize=6.5,fontweight="bold")
 axE.axhline(0.235,color=GREY,ls=":",lw=0.8)
 axE.set_ylim(0,0.9); axE.set_xticks(range(7)); axE.set_xticklabels(labels,fontsize=6.5)
