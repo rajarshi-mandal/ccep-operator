@@ -14,7 +14,7 @@ def rank(x): return np.argsort(np.argsort(x)).astype(float)
 fig=plt.figure(figsize=(11,3.0)); gs=GridSpec(1,4,figure=fig,wspace=0.42,left=0.055,right=0.99,top=0.84,bottom=0.2)
 
 # ---- A: our operator vs F-TRACT (parcel-pair hexbin) ----
-axA=fig.add_subplot(gs[0,0]); panel(axA,"A")
+axA=fig.add_subplot(gs[0,0]); panel(axA,"a")
 import ccep_ftract_crossmap as CM
 header,pidx,ft_amp=CM.load_ft("amplitude"); n_p=len(header)
 mapper=CM.build_mapper()
@@ -37,10 +37,10 @@ axA.hexbin(xr,yr,gridsize=34,cmap=CMAP_AMP,mincnt=1,linewidths=0)
 b,a=np.polyfit(xr,yr,1); axA.plot([xr.min(),xr.max()],[b*xr.min()+a,b*xr.max()+a],color=CORAL,lw=1.4)
 rho=np.corrcoef(xr,yr)[0,1]
 axA.set_xlabel("our operator (rank)"); axA.set_ylabel("F-TRACT 780pt (rank)"); axA.set_xticks([]); axA.set_yticks([])
-axA.set_title(f"Recovers population\nstructure ($\\rho$={rho:.2f})",fontsize=8,loc="left")
+axA.set_title("Atlas evoked amplitude\nversus operator weight",fontsize=8,loc="left")
 
 # ---- B: CCEP effective vs DWI structural (Glasser hexbin) ----
-axB=fig.add_subplot(gs[0,1]); panel(axB,"B")
+axB=fig.add_subplot(gs[0,1]); panel(axB,"b")
 import ccep_struct as ST
 en_lab,SC=ST.load_enigma_sc(); hdr,prob=ST.load_ft_hcp("probability"); _,dist=ST.load_ft_hcp("euclidian_distance")
 pos={p:i for i,p in enumerate(hdr)}; order=[pos.get(l) for l in en_lab]
@@ -53,19 +53,19 @@ axB.hexbin(xr,yr,gridsize=30,cmap=CMAP_AMP,mincnt=1,linewidths=0)
 b,a=np.polyfit(xr,yr,1); axB.plot([xr.min(),xr.max()],[b*xr.min()+a,b*xr.max()+a],color=CORAL,lw=1.4)
 rho=np.corrcoef(xr,yr)[0,1]
 axB.set_xlabel("DWI structural (rank)"); axB.set_ylabel("CCEP effective (rank)"); axB.set_xticks([]); axB.set_yticks([])
-axB.set_title(f"Tracks structure\n($\\rho$={rho:.2f})",fontsize=8,loc="left")
+axB.set_title("Effective versus diffusion\nstructural connectivity",fontsize=8,loc="left")
 
 # ---- C: geometry dominance (raw vs distance-controlled) ----
-axC=fig.add_subplot(gs[0,2]); panel(axC,"C")
+axC=fig.add_subplot(gs[0,2]); panel(axC,"c")
 st=J("struct"); raw=st["ages_15_100"]["rho_prob_struct"]; part=st["ages_15_100"]["partial_prob_struct_given_dist"]
 axC.bar([0,1],[raw,part],color=[NAVY,GREY],width=0.5,zorder=3)
 for i,v in enumerate([raw,part]): axC.text(i,v+0.005,f"{v:.2f}",ha="center",fontsize=8,fontweight="bold")
 axC.set_ylim(0,0.26); axC.set_xticks([0,1]); axC.set_xticklabels(["raw","| distance"],fontsize=7)
 axC.set_ylabel(r"CCEP $\sim$ structural $\rho$")
-axC.set_title("Correspondence is\nalmost all geometric",fontsize=8,loc="left")
+axC.set_title("Rank correlation with and\nwithout distance control",fontsize=8,loc="left")
 
 # ---- D: TMS-EEG per-subject dumbbell (distance vs CCEP, beyond) ----
-axD=fig.add_subplot(gs[0,3]); panel(axD,"D")
+axD=fig.add_subplot(gs[0,3]); panel(axD,"d")
 tm=J("tmseeg"); per=tm.get("per_subject",[])
 dist_r=[p.get("distance",0) for p in per]; part_r=[p.get("partial",0) for p in per]
 o=np.argsort(part_r); x=np.arange(len(per))
@@ -74,6 +74,6 @@ axD.scatter(x,np.array(dist_r)[o],s=18,color=NAVY,label="distance$\\to$TEP")
 axD.scatter(x,np.array(part_r)[o],s=18,color=TEAL,label="CCEP | dist")
 axD.axhline(0,color=CORAL,ls="--",lw=0.8)
 axD.set_ylim(-0.6,0.7); axD.set_xlabel("TMS-EEG subjects"); axD.set_ylabel(r"$\rho$ with TEP"); axD.legend(fontsize=6,loc="lower right")
-axD.set_title("TMS-EEG bridge:\ninconclusive (1/6)",fontsize=8,loc="left")
+axD.set_title("TMS-EEG rank correlations\nin six subjects",fontsize=8,loc="left")
 
 fig.savefig(REP/"figs"/"Figure_5.png",bbox_inches="tight",facecolor="white"); print("saved Figure_5 (elite)")

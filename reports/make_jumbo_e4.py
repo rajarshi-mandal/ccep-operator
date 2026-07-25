@@ -86,13 +86,13 @@ ax.set_ylabel("full-trace prediction r (n=37)"); ax.set_title("CCEP is largely s
 ax.text(0.5,0.9,f"but the operator predicts contact-specific\nCONDUCTION TIMING (ρ={lds['latency_rho_mean']:.2f}, 34/37, p≈0)",
         transform=ax.transAxes,ha="center",va="top",fontsize=8)
 
-# (f) T1.1 targeting honest negative
+# (f) T1.1 single-target capture score
 ax=fig.add_subplot(gs[2,1]); plabel(ax,"f")
 mm=ctl["targeting"]["capture_model_mean"]; dd=ctl["targeting"]["capture_distance_mean"]
 ax.bar([0,1],[mm,dd],color=[TEAL,BLUE],width=0.5,zorder=3)
 for i,v in enumerate([mm,dd]): ax.text(i,v+0.008,f"{v:.2f}",ha="center",fontsize=8.5,fontweight="bold")
 ax.set_ylim(0,0.55); ax.set_xticks([0,1]); ax.set_xticklabels(["operator\nchooser","distance\nchooser"],fontsize=8.5)
-ax.set_ylabel("target-capture (1=oracle, 0=random)"); ax.set_title("Single-site targeting: honest tie",loc="left")
+ax.set_ylabel("target-capture (1=oracle, 0=random)"); ax.set_title("Single-target capture score by model",loc="left")
 ax.text(0.5,0.9,"operator nests distance, so geometry already\ncaptures point-targeting (delta n.s.)",transform=ax.transAxes,ha="center",va="top",fontsize=8)
 
 fig.savefig(OUT/"jumbo_E4.png",bbox_inches="tight"); plt.close(fig)

@@ -17,7 +17,7 @@ ctl=J("control")
 fig=plt.figure(figsize=(11,3.0)); gs=GridSpec(1,5,figure=fig,wspace=0.5,left=0.05,right=0.99,top=0.84,bottom=0.2)
 
 # A: controllability -> reach, example patient scatter + strip inset
-axA=fig.add_subplot(gs[0,0]); panel(axA,"A")
+axA=fig.add_subplot(gs[0,0]); panel(axA,"a")
 ex=max(ctl["per_subject"],key=lambda p:(p.get("ctrl_reach_rho") or 0))
 # recompute the per-site controllability vs reach for the example subject
 sub_ex=ex["subject"].split("/")[-1]
@@ -32,17 +32,20 @@ for s in keep:
 cc=np.array(cc); rr=np.array(rr)
 axA.scatter(cc,rr,s=12,color=TEAL,alpha=0.7,edgecolor="none")
 b,a=np.polyfit(cc,rr,1); xs=np.linspace(cc.min(),cc.max(),20); axA.plot(xs,b*xs+a,color=CORAL,lw=1.4)
-axA.set_xlabel("site controllability"); axA.set_ylabel("measured network reach"); axA.set_xticks([]); axA.set_yticks([])
-axA.set_title("Controllability predicts\nreach (example patient)",fontsize=8,loc="left")
+axA.set_xlabel("average controllability"); axA.set_ylabel("measured network reach"); axA.set_xticks([]); axA.set_yticks([])
+axA.set_title("Network reach versus\naverage controllability",fontsize=8,loc="left")
 rho=np.array([p["ctrl_reach_rho"] for p in ctl["per_subject"] if p.get("ctrl_reach_rho") is not None])
-axi=axA.inset_axes([0.58,0.14,0.38,0.32]); axi.hist(rho,bins=16,color=TEAL); axi.axvline(0,color=CORAL,ls="--",lw=0.8)
-axi.set_title(f"{int((rho>0).sum())}/93",fontsize=6); axi.tick_params(labelsize=5); axi.set_yticks([])
+# headroom so the inset clears the scatter
+axA.set_ylim(top=axA.get_ylim()[1]+0.42*(axA.get_ylim()[1]-axA.get_ylim()[0]))
+axi=axA.inset_axes([0.06,0.70,0.34,0.27]); axi.hist(rho,bins=16,color=TEAL); axi.axvline(0,color=CORAL,ls="--",lw=0.8)
+axi.set_title(f"{int((rho>0).sum())}/93 patients",fontsize=6,pad=2); axi.tick_params(labelsize=5); axi.set_yticks([])
+axi.patch.set_alpha(1.0); axi.set_zorder(5)
 
 # B: controllability on brain
-axB=fig.add_subplot(gs[0,1]); panel(axB,"B")
+axB=fig.add_subplot(gs[0,1]); panel(axB,"b")
 A=V2._build_operator(cs,list(keep),"symmetric"); avg,_=controllability(A)
 glass_markers(axB,cs.contact_xyz,avg,CMAP_AMP,display="z",size=16)
-axB.set_title("Average controllability\non the montage",fontsize=8)
+axB.set_title("Average controllability\nacross implanted contacts",fontsize=8,loc="left")
 
 # ---- SOZ: features + labels + leave-one-subject-out logistic ROC ----
 data,fnames=SZ.collect(); idx={f:i for i,f in enumerate(fnames)}
@@ -68,15 +71,15 @@ Pop,Y=loso_probs(op); fop,top=roc(Pop,Y)
 Pag,_=loso_probs(ag); fag,tag=roc(Pag,Y)
 
 # C: SOZ ROC
-axC=fig.add_subplot(gs[0,2]); panel(axC,"C")
-axC.plot(fop,top,color=TEAL,lw=1.8,label="operator (0.61)")
-axC.plot(fag,tag,color=GREY,lw=1.6,label="amp+geom (0.56)")
+axC=fig.add_subplot(gs[0,2]); panel(axC,"c")
+axC.plot(fop,top,color=TEAL,lw=1.8,label="operator features (AUC 0.61)")
+axC.plot(fag,tag,color=GREY,lw=1.6,label="amplitude + geometry (AUC 0.56)")
 axC.plot([0,1],[0,1],color=INK,ls="--",lw=0.7)
 axC.set_xlabel("false positive rate"); axC.set_ylabel("true positive rate"); axC.legend(fontsize=6,loc="lower right")
-axC.set_title("Localizes seizure-\nonset zone",fontsize=8,loc="left")
+axC.set_title("Seizure-onset zone\nclassification by feature set",fontsize=8,loc="left")
 
 # D: SOZ on brain (focal-SOZ example) — colour by efferent, mark SOZ contacts
-axD=fig.add_subplot(gs[0,3]); panel(axD,"D")
+axD=fig.add_subplot(gs[0,3]); panel(axD,"d")
 focal=[d for d in data if 5<=int(d["soz"].sum())<=12]
 ex_soz=max(focal,key=lambda d:len(d["names"])) if focal else max(data,key=lambda d:d["soz"].sum())
 cs2,_=load_subject(ex_soz["subject"],"ds004080")
@@ -88,16 +91,16 @@ effmap={n:v for n,v in zip(ex_soz["names"],ex_soz["X"][:,idx["efferent_strength"
 effv=np.array([effmap.get(n,np.nan) for n in names]); effv=np.where(np.isfinite(effv),effv,np.nanmedian(effv))
 disp=glass_markers(axD,cs2.contact_xyz,effv,CMAP_AMP,display="z",size=20)
 if soz.any(): disp.add_markers(cs2.contact_xyz[soz],marker_color=[CORAL],marker_size=22,marker='o')
-axD.set_title("Efferent strength;\nSOZ marked (red)",fontsize=8)
+axD.set_title("Efferent strength with\nseizure-onset contacts",fontsize=8,loc="left")
 
 # E: targeting capture distribution
-axE=fig.add_subplot(gs[0,4]); panel(axE,"E")
+axE=fig.add_subplot(gs[0,4]); panel(axE,"e")
 tg=ctl["targeting"]
 per=[p for p in ctl["per_subject"]]
 mc=[p["capture_model"] for p in per]; dc=[p["capture_distance"] for p in per]
 axE.hist(dc,bins=14,color=NAVY,alpha=0.55,label=f"distance {tg['capture_distance_mean']:.2f}")
 axE.hist(mc,bins=14,color=TEAL,alpha=0.55,label=f"operator {tg['capture_model_mean']:.2f}")
 axE.set_xlabel("target-capture (1=oracle)"); axE.set_ylabel("patients"); axE.legend(fontsize=6)
-axE.set_title("Single-site targeting:\nhonest tie",fontsize=8,loc="left")
+axE.set_title("Single-target capture\nscore by model",fontsize=8,loc="left")
 
 fig.savefig(REP/"figs"/"Figure_3.png",bbox_inches="tight",facecolor="white"); print("saved Figure_3 (elite)")

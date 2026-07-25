@@ -1,4 +1,8 @@
-"""Figures 3 (control+clinical), 4 (generalization+dynamics), 5 (external validation)."""
+"""Figure 4 (generalization + dynamics).
+
+Only the Figure 4 block is canonical. The Figure 3 and Figure 5 blocks below are
+superseded by make_fig3.py and make_fig5.py and write to reports/figs/superseded/.
+"""
 import warnings; warnings.filterwarnings("ignore")
 import json
 import numpy as np
@@ -24,35 +28,35 @@ ctl=J("control"); soz=J("soz")
 fig=plt.figure(figsize=(11,3.2)); gs=GridSpec(1,5,figure=fig,wspace=0.5,left=0.05,right=0.99,top=0.86,bottom=0.2)
 
 # A controllability->reach strip
-axA=fig.add_subplot(gs[0,0]); panel(axA,"A")
+axA=fig.add_subplot(gs[0,0]); panel(axA,"a")
 rho=np.array([p["ctrl_reach_rho"] for p in ctl["per_subject"] if p.get("ctrl_reach_rho") is not None])
 o=np.argsort(rho)
 axA.vlines(np.arange(len(rho)),0,rho[o],color=LGREY,lw=0.5)
 axA.scatter(np.arange(len(rho)),rho[o],s=8,color=TEAL,zorder=3)
 axA.axhline(0,color=CORAL,ls="--",lw=0.8)
 axA.set_ylim(-0.05,0.9); axA.set_xlabel("patients"); axA.set_ylabel(r"controllability$\to$reach $\rho$")
-axA.set_title(f"Controllability predicts\nuntested reach ({int((rho>0).sum())}/93)",fontsize=8,loc="left")
+axA.set_title("Controllability to reach\ncorrelation per patient",fontsize=8,loc="left")
 
 # B controllability on brain
-axB=fig.add_subplot(gs[0,1]); panel(axB,"B")
+axB=fig.add_subplot(gs[0,1]); panel(axB,"b")
 cs,_=load_subject("sub-ccepAgeUMCU48")
 keep=np.arange(len(cs.sites))[(np.isfinite(cs.reliability))&(cs.reliability>=0.3)]
 A=V2._build_operator(cs,list(keep),"symmetric"); avg,_=controllability(A)
 glass_markers(axB,cs.contact_xyz,avg,CMAP_AMP,display="z",size=16)
-axB.set_title("Average controllability\n(example patient)",fontsize=8)
+axB.set_title("Average controllability\nacross implanted contacts",fontsize=8,loc="left")
 
 # C SOZ AUC
-axC=fig.add_subplot(gs[0,2]); panel(axC,"C")
+axC=fig.add_subplot(gs[0,2]); panel(axC,"c")
 b=soz["soz"]["mv_amp_geom"]["auc"]; op=soz["soz"]["mv_operator_only"]["auc"]; f=soz["soz"]["mv_full"]["auc"]
 axC.bar([0,1,2],[b,op,f],color=[GREY,TEAL,AMBER],width=0.62,zorder=3)
 for i,v in enumerate([b,op,f]): axC.text(i,v+0.004,f"{v:.3f}",ha="center",fontsize=6.5,fontweight="bold")
 axC.axhline(0.5,color=CORAL,ls="--",lw=0.8); axC.set_ylim(0.5,0.66)
 axC.set_xticks([0,1,2]); axC.set_xticklabels(["amp+\ngeom","operator\nonly","full"],fontsize=6.5)
 axC.set_ylabel("seizure-onset-zone AUC")
-axC.set_title("Operator localizes\nepileptogenic tissue",fontsize=8,loc="left")
+axC.set_title("Seizure-onset zone\nclassification by feature set",fontsize=8,loc="left")
 
 # D SOZ univariate features
-axD=fig.add_subplot(gs[0,3]); panel(axD,"D")
+axD=fig.add_subplot(gs[0,3]); panel(axD,"d")
 uni=soz["soz"]["univariate"]; order=["afferent_strength","efferent_strength","asymmetry","avg_ctrb","modal_ctrb"]
 labs=["affer.","effer.","asym.","avg\nctrb","modal\nctrb"]; au=[uni[k]["auc"] for k in order]
 cols=[GREY,TEAL,TEAL,TEAL,VIOLET]
@@ -60,17 +64,18 @@ axD.bar(range(5),au,color=cols,width=0.7,zorder=3)
 for i,v in enumerate(au): axD.text(i,v+0.005 if v>.5 else v-0.03,f"{v:.2f}",ha="center",fontsize=6,fontweight="bold")
 axD.axhline(0.5,color=CORAL,ls="--",lw=0.8); axD.set_ylim(0.38,0.68)
 axD.set_xticks(range(5)); axD.set_xticklabels(labs,fontsize=6.5); axD.set_ylabel("within-subject AUC")
-axD.set_title("SOZ = high avg /\nlow modal ctrb",fontsize=8,loc="left")
+axD.set_title("Seizure-onset zone\nclassification by feature",fontsize=8,loc="left")
 
-# E targeting honest tie
-axE=fig.add_subplot(gs[0,4]); panel(axE,"E")
+# e: single-target capture score, operator vs distance heuristic
+axE=fig.add_subplot(gs[0,4]); panel(axE,"e")
 tg=ctl["targeting"]; mm=tg["capture_model_mean"]; dd=tg["capture_distance_mean"]
 axE.bar([0,1],[mm,dd],color=[TEAL,NAVY],width=0.55,zorder=3)
 for i,v in enumerate([mm,dd]): axE.text(i,v+0.006,f"{v:.2f}",ha="center",fontsize=7,fontweight="bold")
 axE.set_ylim(0,0.5); axE.set_xticks([0,1]); axE.set_xticklabels(["operator","distance"],fontsize=7)
 axE.set_ylabel("target-capture (1=oracle)")
-axE.set_title("Single-site targeting:\nhonest tie",fontsize=8,loc="left")
-fig.savefig(REP/"figs"/"Figure_3.png",bbox_inches="tight",facecolor="white"); plt.close(fig); print("Figure_3 ok")
+axE.set_title("Single-target capture\nscore by model",fontsize=8,loc="left")
+(REP/"figs"/"superseded").mkdir(parents=True,exist_ok=True)
+fig.savefig(REP/"figs"/"superseded"/"Figure_3_superseded.png",bbox_inches="tight",facecolor="white"); plt.close(fig); print("Figure_3 (superseded design) -> figs/superseded/")
 
 # ============================ FIGURE 4 — generalization + dynamics ============================
 dev=J("developmental"); cs4=J("coldstart"); lds=J("lds")
@@ -78,45 +83,50 @@ rec=dev["records"]
 fig=plt.figure(figsize=(11,3.2)); gs=GridSpec(1,5,figure=fig,wspace=0.5,left=0.05,right=0.99,top=0.86,bottom=0.2)
 age=np.array(rec["age"],float); pred=np.array(rec["combo"],float); sym=np.array(rec["sym"],float)
 
-axA=fig.add_subplot(gs[0,0]); panel(axA,"A")
+axA=fig.add_subplot(gs[0,0]); panel(axA,"a")
 axA.scatter(age,pred,s=10,color=TEAL,alpha=0.7,edgecolor="none")
 r=spearman_line(axA,age,pred,CORAL)
 axA.set_xlabel("age (years)"); axA.set_ylabel("predictability r")
-axA.set_title(f"Predictability rises\nwith age ($\\rho$={r:+.2f})",fontsize=8,loc="left")
+axA.set_title("Per-patient topography\ncorrelation versus age",fontsize=8,loc="left")
 
-axB=fig.add_subplot(gs[0,1]); panel(axB,"B")
+axB=fig.add_subplot(gs[0,1]); panel(axB,"b")
 axB.scatter(age,sym,s=10,color=VIOLET,alpha=0.7,edgecolor="none")
 r=spearman_line(axB,age,sym,CORAL)
 axB.set_xlabel("age (years)"); axB.set_ylabel("operator reciprocity")
-axB.set_title(f"Reciprocity rises\nwith age ($\\rho$={r:+.2f})",fontsize=8,loc="left")
+axB.set_title("Operator reciprocity\nversus age",fontsize=8,loc="left")
 
-axC=fig.add_subplot(gs[0,2]); panel(axC,"C")
+axC=fig.add_subplot(gs[0,2]); panel(axC,"c")
 names=["group\nmarginal","group\noperator","own\ngeometry"]
 vals=[cs4["coldstart"]["group_marginal"]["mean"],cs4["coldstart"]["group_op"]["mean"],cs4["coldstart"]["distance"]["mean"]]
 axC.bar(range(3),vals,color=[GREY,TEAL,NAVY],width=0.62,zorder=3)
 for i,v in enumerate(vals): axC.text(i,v+0.01,f"{v:.2f}",ha="center",fontsize=6.5,fontweight="bold")
-axC.set_ylim(0,0.75); axC.set_xticks(range(3)); axC.set_xticklabels(names,fontsize=6.5)
+# headroom so the inset clears the tallest bar
+axC.set_ylim(0,1.12); axC.set_xticks(range(3)); axC.set_xticklabels(names,fontsize=6.5)
 axC.set_ylabel("predict unseen patient, r")
-axC.set_title("Cold-start: transferable\npart is geometric",fontsize=8,loc="left")
-axi=axC.inset_axes([0.55,0.14,0.4,0.34]); ks=[0,1,3,5,10]
+axC.set_title("Held-out topography\ncorrelation by source",fontsize=8,loc="left")
+axi=axC.inset_axes([0.22,0.66,0.72,0.28]); ks=[0,1,3,5,10]
 axi.plot(ks,[cs4["fewshot"][str(k)] for k in ks],"-o",color=AMBER,ms=2.5,lw=1.2)
-axi.set_title("few-shot",fontsize=6); axi.tick_params(labelsize=5); axi.set_xlabel("pilot",fontsize=5)
+axi.set_title("accuracy after a short pilot",fontsize=5.5,pad=2)
+axi.set_xlabel("pilot sites",fontsize=5,labelpad=1); axi.set_xticks([0,5,10])
+axi.tick_params(labelsize=4.5,pad=1)
+axi.patch.set_alpha(1.0); axi.set_zorder(5)
 
-axD=fig.add_subplot(gs[0,3]); panel(axD,"D")
+axD=fig.add_subplot(gs[0,3]); panel(axD,"d")
 an=J("animal"); ks=sorted(int(k) for k in an["reliability_vs_trials"]); rv=[an["reliability_vs_trials"][str(k)] for k in ks]
 axD.plot(ks,rv,"-o",color=TEAL,lw=1.8,ms=5,zorder=3)
-axD.set_ylim(0,0.85); axD.set_xlabel("trials per site"); axD.set_ylabel("split-half reliability")
-axD.set_title("Dense SITES, not trials,\nlimit identifiability",fontsize=8,loc="left")
-axD.text(0.5,0.28,f"but {int(an['sites_per_session']['frac_under_6']*100)}% of sessions <6 sites\n(median {an['sites_per_session']['median']:.0f})",
-         transform=axD.transAxes,ha="center",fontsize=6)
+axD.set_ylim(0,0.95); axD.set_xlabel("trials per site"); axD.set_ylabel("split-half reliability")
+axD.set_title("Split-half reliability\nversus trials per site",fontsize=8,loc="left")
+# annotation in the lower-right, clear of the curve
+axD.text(0.97,0.06,f"{int(an['sites_per_session']['frac_under_6']*100)}% of sessions had fewer than\nsix stimulation sites (median {an['sites_per_session']['median']:.0f})",
+         transform=axD.transAxes,ha="right",va="bottom",fontsize=5.5,color=GREY)
 
-axE=fig.add_subplot(gs[0,4]); panel(axE,"E")
+axE=fig.add_subplot(gs[0,4]); panel(axE,"e")
 l=lds["fulltrace"]["lds_mean"]; s=lds["fulltrace"]["sep_mean"]
 axE.bar([0,1],[l,s],color=[VIOLET,GREY],width=0.55,zorder=3)
 for i,v in enumerate([l,s]): axE.text(i,v+0.008,f"{v:.2f}",ha="center",fontsize=7,fontweight="bold")
 axE.set_ylim(0,0.6); axE.set_xticks([0,1]); axE.set_xticklabels(["dynamical","separable"],fontsize=7)
 axE.set_ylabel("full-trace r (n=37)")
-axE.set_title("CCEP largely separable;\noperator adds timing",fontsize=8,loc="left")
+axE.set_title("Full-trace correlation\nby model",fontsize=8,loc="left")
 axE.text(0.5,0.9,f"timing $\\rho$={lds['latency_rho_mean']:.2f}, 34/37",transform=axE.transAxes,ha="center",fontsize=6)
 fig.savefig(REP/"figs"/"Figure_4.png",bbox_inches="tight",facecolor="white"); plt.close(fig); print("Figure_4 ok")
 
@@ -124,31 +134,31 @@ fig.savefig(REP/"figs"/"Figure_4.png",bbox_inches="tight",facecolor="white"); pl
 ft=J("ftract"); cm=J("ftract_crossmap"); st=J("struct"); tm=J("tmseeg")
 fig=plt.figure(figsize=(11,3.2)); gs=GridSpec(1,4,figure=fig,wspace=0.42,left=0.055,right=0.99,top=0.86,bottom=0.2)
 
-axA=fig.add_subplot(gs[0,0]); panel(axA,"A")
+axA=fig.add_subplot(gs[0,0]); panel(axA,"a")
 ov=cm["operator_validation"]
 axA.bar([0,1],[ov["rho_amplitude"],ov["rho_probability"]],color=[TEAL,NAVY],width=0.55,zorder=3)
 for i,v in enumerate([ov["rho_amplitude"],ov["rho_probability"]]): axA.text(i,v+0.005,f"{v:.2f}",ha="center",fontsize=7,fontweight="bold")
 axA.set_ylim(0,0.32); axA.set_xticks([0,1]); axA.set_xticklabels(["vs\namplitude","vs\nprobability"],fontsize=6.5)
 axA.set_ylabel(r"our operator vs F-TRACT $\rho$")
-axA.set_title(f"Recovers 780-patient\nstructure (n$\\sim$10$^4$ pairs)",fontsize=8,loc="left")
+axA.set_title("Atlas evoked amplitude\nversus operator weight",fontsize=8,loc="left")
 
-axB=fig.add_subplot(gs[0,1]); panel(axB,"B")
+axB=fig.add_subplot(gs[0,1]); panel(axB,"b")
 loc=-ft["amplitude_locality"]["rho_amp_distance"]; rc=ft["directionality"]["amplitude_reciprocity"]
 axB.bar([0,1],[loc,rc],color=[TEAL,VIOLET],width=0.5,zorder=3)
 for i,v in enumerate([loc,rc]): axB.text(i,v+0.006,f"{v:.2f}",ha="center",fontsize=7,fontweight="bold")
 axB.set_ylim(0,0.42); axB.set_xticks([0,1]); axB.set_xticklabels(["locality\n$|\\rho|$","reciprocal\ndominance"],fontsize=6.5)
 axB.set_ylabel("F-TRACT effect (780 pt)")
-axB.set_title("Locality & reciprocity\nreplicate",fontsize=8,loc="left")
+axB.set_title("Locality and reciprocity\nin the atlas",fontsize=8,loc="left")
 
-axC=fig.add_subplot(gs[0,2]); panel(axC,"C")
+axC=fig.add_subplot(gs[0,2]); panel(axC,"c")
 raw=st["ages_15_100"]["rho_prob_struct"]; part=st["ages_15_100"]["partial_prob_struct_given_dist"]
 axC.bar([0,1],[raw,part],color=[NAVY,GREY],width=0.5,zorder=3)
 for i,v in enumerate([raw,part]): axC.text(i,v+0.005,f"{v:.2f}",ha="center",fontsize=7,fontweight="bold")
 axC.set_ylim(0,0.26); axC.set_xticks([0,1]); axC.set_xticklabels(["raw","| distance"],fontsize=6.5)
 axC.set_ylabel(r"CCEP $\sim$ DWI structural $\rho$")
-axC.set_title("Follows structure\nvia geometry",fontsize=8,loc="left")
+axC.set_title("Rank correlation with and\nwithout distance control",fontsize=8,loc="left")
 
-axD=fig.add_subplot(gs[0,3]); panel(axD,"D")
+axD=fig.add_subplot(gs[0,3]); panel(axD,"d")
 per=tm.get("per_subject",[])
 if per:
     vals=[p.get("partial",p.get("raw",0)) for p in per]
@@ -156,5 +166,6 @@ if per:
     axD.bar(range(len(vals)),sorted(vals),color=[TEAL if v>0 else GREY for v in sorted(vals)],width=0.7,zorder=3)
 axD.set_ylim(-0.45,0.45); axD.set_xlabel("TMS-EEG subjects")
 axD.set_ylabel(r"CCEP$\to$TEP $\rho$ | distance")
-axD.set_title("TMS-EEG bridge:\ninconclusive (1/6)",fontsize=8,loc="left")
-fig.savefig(REP/"figs"/"Figure_5.png",bbox_inches="tight",facecolor="white"); plt.close(fig); print("Figure_5 ok")
+axD.set_title("TMS-EEG rank correlations\nin six subjects",fontsize=8,loc="left")
+(REP/"figs"/"superseded").mkdir(parents=True,exist_ok=True)
+fig.savefig(REP/"figs"/"superseded"/"Figure_5_superseded.png",bbox_inches="tight",facecolor="white"); plt.close(fig); print("Figure_5 (superseded design) -> figs/superseded/")

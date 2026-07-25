@@ -2,7 +2,7 @@
 Rich, publication-grade panels: glass-brain electrode plots (nilearn), CCEP traces & heatmaps,
 operator matrices, predicted-vs-measured maps, per-subject strip plots. Consistent palette."""
 import warnings; warnings.filterwarnings("ignore")
-import sys, glob, re
+import os, sys, glob, re
 from pathlib import Path
 import numpy as np
 import matplotlib
@@ -11,9 +11,17 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm, Normalize
 
-ROOT = Path("REDACTED/causal-dag-ssm")
+# Analysis root holding data/processed, data/traces and reports/. Set CCEP_ROOT
+# before running any make_fig*.py.
+ROOT = Path(os.environ.get("CCEP_ROOT", ""))
+if not (ROOT / "reports").is_dir():
+    raise SystemExit(
+        f"CCEP_ROOT does not point at the analysis root (looked for {ROOT/'reports'}). "
+        "It must contain data/processed, data/traces and reports/."
+    )
 sys.path.insert(0, str(ROOT / "src")); sys.path.insert(0, str(ROOT / "experiments"))
 REP = ROOT / "reports"
+(REP / "figs").mkdir(parents=True, exist_ok=True)
 
 # ---- palette ----
 INK="#0E2233"; TEAL="#0FA3A3"; AMBER="#E8912A"; NAVY="#20456E"; CORAL="#E4572E"
