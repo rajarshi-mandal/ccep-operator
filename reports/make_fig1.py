@@ -107,7 +107,12 @@ for i,xi in enumerate(order):
 axF.scatter(x, d[order], s=8, color=NAVY, label="distance", zorder=2)
 axF.scatter(x, v2[order], s=8, color=TEAL, label="operator", zorder=3)
 wins=int((v2>d).sum())
-axF.set_xlim(-1,len(v2)); axF.set_ylim(0.2,0.95)
+# y-limits from the data: the previous fixed 0.2-0.95 window dropped one patient's
+# distance value below the axis and clipped the top operator marker, so the panel
+# rendered 92 of 93 distance points while the caption claims 93/93.
+_lo=float(min(np.nanmin(d),np.nanmin(v2))); _hi=float(max(np.nanmax(d),np.nanmax(v2)))
+_pad=0.06*(_hi-_lo)
+axF.set_xlim(-1,len(v2)); axF.set_ylim(_lo-_pad,_hi+_pad)
 axF.set_xlabel("patients (sorted by operator r)"); axF.set_ylabel("held-out r")
 axF.legend(loc="lower right", ncol=2)
 axF.set_title("Per-patient topography correlation, operator and distance models", fontsize=8.5, loc="left")

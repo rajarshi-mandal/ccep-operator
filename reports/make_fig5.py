@@ -74,6 +74,6 @@ axD.scatter(x,np.array(dist_r)[o],s=18,color=NAVY,label="distance$\\to$TEP")
 axD.scatter(x,np.array(part_r)[o],s=18,color=TEAL,label="CCEP | dist")
 axD.axhline(0,color=CORAL,ls="--",lw=0.8)
 axD.set_ylim(-0.6,0.7); axD.set_xlabel("TMS-EEG subjects"); axD.set_ylabel(r"$\rho$ with TEP"); axD.legend(fontsize=6,loc="lower right")
-axD.set_title("TMS-EEG rank correlations\nin six subjects",fontsize=8,loc="left")
+axD.set_title("TMS-EEG rank correlations\nper subject",fontsize=8,loc="left")
 
 fig.savefig(REP/"figs"/"Figure_5.png",bbox_inches="tight",facecolor="white"); print("saved Figure_5 (elite)")
