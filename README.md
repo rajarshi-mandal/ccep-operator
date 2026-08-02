@@ -78,4 +78,6 @@ tests/                      # pytest suite incl. test_ccep_operator.py
 ## Citation
 
 Puli R, Mandal R, Eckstein M. *An individualized propagation operator predicts cortical responses
-to stimulation.* Under review (*Brain Stimulation*); a preliminary subset appears at IEEE EMBS BHI.
+to stimulation.* Under review at IEEE EMBS BHI.
+
+<!-- Under review (*Brain Stimulation*); a preliminary subset appears at IEEE EMBS BHI. -->
