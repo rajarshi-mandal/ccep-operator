@@ -125,9 +125,15 @@ l=lds["fulltrace"]["lds_mean"]; s=lds["fulltrace"]["sep_mean"]
 axE.bar([0,1],[l,s],color=[VIOLET,GREY],width=0.55,zorder=3)
 for i,v in enumerate([l,s]): axE.text(i,v+0.008,f"{v:.2f}",ha="center",fontsize=7,fontweight="bold")
 axE.set_ylim(0,0.6); axE.set_xticks([0,1]); axE.set_xticklabels(["dynamical","separable"],fontsize=7)
-axE.set_ylabel("full-trace r (n=37)")
+# n and the win count come from the data. Both were hardcoded as 37 and 34/37, which
+# did not match lds.json (n_subjects=13); the LDS runs on ds004774+ds004696 only.
+_n=lds.get("n_subjects") or len(lds.get("per_subject") or [])
+_per=lds.get("per_subject") or []
+_wins=sum(1 for p in _per if (p.get("latency_rho") or 0)>0) if _per else None
+axE.set_ylabel(f"full-trace r (n={_n})")
 axE.set_title("Full-trace correlation\nby model",fontsize=8,loc="left")
-axE.text(0.5,0.9,f"timing $\\rho$={lds['latency_rho_mean']:.2f}, 34/37",transform=axE.transAxes,ha="center",fontsize=6)
+_ann=f"timing $\\rho$={lds['latency_rho_mean']:.2f}" + (f", {_wins}/{_n}" if _wins is not None else "")
+axE.text(0.5,0.9,_ann,transform=axE.transAxes,ha="center",fontsize=6)
 fig.savefig(REP/"figs"/"Figure_4.png",bbox_inches="tight",facecolor="white"); plt.close(fig); print("Figure_4 ok")
 
 # ============================ FIGURE 5 — external validation ============================

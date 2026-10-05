@@ -83,7 +83,10 @@ axDs.set_xticks([]); axDs.set_yticks([])
 axE = fig.add_subplot(gs[1, 0:5]); panel(axE, "e")
 # row-normalized: the amplitude-destroying negative control (falls below distance)
 labels=["within-\nmean","row-\nnormalized","distance","stim-\nkNN","operator","combo","ensemble"]
-vals=[0.235,0.622,0.641,0.688,0.710,0.730,0.743]   # subject-mean held-out r (n=93)
+vals=[0.235,0.622,0.641,0.693,0.710,0.730,0.743]   # subject-mean held-out r (n=93)
+# NOTE: these are literals, not read from the logs at plot time. stim-kNN was 0.688
+# here but 0.693 in reports/_repro_loso.txt; corrected. If any model is re-run these
+# must be updated by hand.
 cols=[GREY,LGREY,NAVY,"#5B7FA6",TEAL,AMBER,GREEN]
 # No error bars: only 4 of these 7 models have a per-subject n=93 log, so honest
 # whiskers (SEM or bootstrap CI) would need per-subject scores for stim-kNN/combo/ensemble.

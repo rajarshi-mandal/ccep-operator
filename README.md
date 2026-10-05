@@ -6,8 +6,9 @@ heat-kernel rollout on the patient's measured connectome that separates spatial 
 from network propagation (`t>0`). Evaluated on 93 patients across 5 public CCEP/iEEG datasets by
 leave-one-stim-site-out. The operator reaches r ≈ 0.71 and beats a distance baseline in 93/93 patients.
 
-**Full methods, results, figures, and discussion are in the paper** (Puli, Mandal & Eckstein,
-under review at *Brain Stimulation*). This README covers only project structure and reproduction.
+**Paper.** This code accompanies Puli, Mandal, Eckstein & Alterovitz, IEEE EMBS BHI 2026 (citation
+below). The repository also includes extended analyses beyond that paper. This README covers only
+project structure and reproduction.
 
 ## Reproduce
 
@@ -30,7 +31,7 @@ Run any single analysis with `.venv/bin/python experiments/<name>.py`:
 
 | script | what it shows |
 |---|---|
-| `ccep_loso.py` | main LOSO: within_mean / distance / stim_knn / operator / combo |
+| `ccep_loso.py` | main LOSSO: within_mean / distance / stim_knn / operator / combo |
 | `ccep_operator_v2.py` | operator beats distance alone (core modeling result) |
 | `ccep_classD.py` | group and individual ensemble (best overall) |
 | `ccep_directed.py` | operator is directed and not symmetric locality |
@@ -39,7 +40,7 @@ Run any single analysis with `.venv/bin/python experiments/<name>.py`:
 | `ccep_highgamma.py` | high-gamma readout is equally predictable |
 | `ccep_control.py` | controllability ranks stimulation sites by network reach |
 | `ccep_soz.py` | seizure-onset-zone localization from operator features |
-| `ccep_step2.py` | responder detection (AUC) and few-shot calibration |
+| `ccep_step2.py` | strong-response detection (AUC) and few-shot calibration |
 | `ccep_ood.py` | leave-one-dataset-out generalization (deployment proxy) |
 | `ccep_ftract.py` | F-TRACT atlas (780 pt) and DWI structural connectome |
 | `ccep_animal.py` | sites-vs-trials identifiability (DANDI animal microstim) |
@@ -77,7 +78,15 @@ tests/                      # pytest suite incl. test_ccep_operator.py
 
 ## Citation
 
-Puli R, Mandal R, Eckstein M. *An individualized propagation operator predicts cortical responses
-to stimulation.* Under review at IEEE EMBS BHI.
+R. Puli, R. Mandal, M. K. Eckstein, and G. Alterovitz, "A Network Propagation State Space Model for
+Individualized Brain Stimulation Responses," in *Proc. IEEE EMBS Int. Conf. Biomedical and Health
+Informatics (BHI)*, Hong Kong, 2026.
 
-<!-- Under review (*Brain Stimulation*); a preliminary subset appears at IEEE EMBS BHI. -->
+```bibtex
+@inproceedings{puli2026bhi,
+  title     = {A Network Propagation State Space Model for Individualized Brain Stimulation Responses},
+  author    = {Puli, Rishik and Mandal, Rajarshi and Eckstein, Maria K. and Alterovitz, Gil},
+  booktitle = {IEEE EMBS International Conference on Biomedical and Health Informatics (BHI)},
+  year      = {2026}
+}
+```
